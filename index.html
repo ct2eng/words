@@ -112,12 +112,12 @@
         </div>
         <div class="flashcard-container">
             <div class="card">
-                <div class="word" id="wordDisplay">Click to start</div>
+                <div class="word" id="wordDisplay">Click "Next" to start</div>
             </div>
             <div>
                 <button onclick="nextWord()">Next</button>
                 <button onclick="shuffleWords()">Random</button>
-                <button onclick="resetWords()">Restart</button>
+                <!-- <button onclick="resetWords()">Restart</button> -->
             </div>
         </div>
     </div>
@@ -344,7 +344,6 @@
 { word: "execrate" },
 { word: "nauseate" },
 { word: "detest" },
-{ word: "혐오감" },
 { word: "aversion" },
 { word: "abhorrence" },
 { word: "abomination" },
@@ -604,7 +603,6 @@
 { word: "sicken" },
 { word: "nauseate" },
 { word: "loathe" },
-{ word: "반감" },
 { word: "revulsion" },
 { word: "repulsion" },
 { word: "repugnance" },
@@ -934,7 +932,6 @@
 { word: "smidgen" },
 { word: "paucity" },
 { word: "morsel " },
-{ word: "빈약한" },
 { word: "negligible" },
 { word: "trivial" },
 { word: "scanty" },
@@ -979,10 +976,9 @@
             
         ];
 
-
         let words = [...originalWords];
         let currentIndex = -1;
-
+    
         // 更新單字列表顯示並高亮當前單字
         function updateWordList(highlightIndex = -1) {
             const wordList = document.getElementById('wordList');
@@ -995,29 +991,22 @@
                 }
                 wordList.appendChild(li);
             });
-
+    
             // 如果有高亮的單字，將其滾動到視圖中
             if (highlightIndex !== -1) {
                 const activeItem = wordList.children[highlightIndex];
                 activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
-
+    
         // 顯示下一個單字
         function nextWord() {
             currentIndex = (currentIndex + 1) % words.length;
             document.getElementById('wordDisplay').textContent = words[currentIndex].word;
             updateWordList(currentIndex);
+            saveState();
         }
-
-        // 重新開始
-        function resetWords() {
-            words = [...originalWords];
-            currentIndex = -1;
-            document.getElementById('wordDisplay').textContent = 'Click to start';
-            updateWordList();
-        }
-
+    
         // 隨機排序單字
         function shuffleWords() {
             for (let i = words.length - 1; i > 0; i--) {
@@ -1027,10 +1016,40 @@
             currentIndex = -1;
             document.getElementById('wordDisplay').textContent = 'Click to start';
             updateWordList();
+            saveState();
         }
-
+    
+        // 儲存當前狀態到 localStorage
+        function saveState() {
+            const state = {
+                words: words, // 儲存當前的單字列表
+                currentIndex: currentIndex // 儲存當前的位置
+            };
+            localStorage.setItem('wordAppState', JSON.stringify(state));
+        }
+    
+        // 從 localStorage 恢復狀態
+        function restoreState() {
+            const savedState = localStorage.getItem('wordAppState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                words = state.words || [...originalWords]; // 恢復單字列表
+                currentIndex = state.currentIndex || -1; // 恢復當前位置
+    
+                if (currentIndex >= 0 && currentIndex < words.length) {
+                    document.getElementById('wordDisplay').textContent = words[currentIndex].word;
+                } else {
+                    document.getElementById('wordDisplay').textContent = 'Click "Next" to start';
+                }
+    
+                updateWordList(currentIndex);
+            } else {
+                updateWordList();
+            }
+        }
+    
         // 初始化顯示
-        updateWordList();
+        restoreState();
     </script>
 </body>
 </html>
